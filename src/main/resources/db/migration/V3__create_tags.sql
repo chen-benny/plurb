@@ -1,0 +1,11 @@
+CREATE TABLE tags (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(64) NOT NULL UNIQUE,
+    slug VARCHAR(64) NOT NULL UNIQUE
+);
+
+CREATE TABLE post_tags (
+    post_id BIGINT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    tag_id BIGINT NOT NULL REFERENCES tags(id) on DELETE CASCADE,
+    PRIMARY KEY (post_id, tag_id)
+);

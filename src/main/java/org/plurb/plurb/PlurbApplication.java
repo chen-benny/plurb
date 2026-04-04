@@ -1,13 +1,13 @@
-package sh.enclave.mmb;
+package org.plurb.plurb;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MmbApplication {
+public class PlurbApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MmbApplication.class, args);
+        SpringApplication.run(PlurbApplication.class, args);
     }
 
 }
