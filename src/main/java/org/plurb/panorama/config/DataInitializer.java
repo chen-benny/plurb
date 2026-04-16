@@ -19,7 +19,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (userRepository.existsByUsername("Benny")) {
+        if (userRepository.existsByUsername("chenbenny31")) {
             return;
         }
         User user = new User();
