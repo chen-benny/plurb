@@ -1,0 +1,231 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg:       #0f0f0f;
+    --surface:  #1a1a1a;
+    --border:   #2a2a2a;
+    --muted:    #666;
+    --text:     #e0e0e0;
+    --accent:   #a8c7fa;
+    --danger:   #f28b82;
+    --radius:   4px;
+    --max-w:    720px;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Georgia', serif;
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* nav */
+nav {
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1.5rem;
+}
+.nav-inner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.nav-brand { font-size: 1.1rem; font-weight: bold; color: var(--text); }
+.nav-links { display: flex; gap: 1rem; align-items: center; font-size: 0.9rem; }
+
+/* container */
+.container {
+    max-width: var(--max-w);
+    margin: 3rem auto;
+    padding: 0 1.5rem;
+}
+
+/* profile */
+.profile-header { margin-bottom: 2.5rem; }
+.profile-header h1 { font-size: 1.8rem; margin-bottom: 0.25rem; }
+.username { color: var(--muted); font-size: 0.9rem; margin-bottom: 0.75rem; }
+.bio { color: var(--text); }
+
+/* post list */
+.post-list { list-style: none; }
+.post-list li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: baseline;
+}
+.post-list li a { font-size: 1.05rem; }
+.date { color: var(--muted); font-size: 0.85rem; margin-left: auto; }
+.tag {
+    font-size: 0.78rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.1rem 0.5rem;
+    color: var(--muted);
+}
+.tag:hover { color: var(--accent); text-decoration: none; }
+
+/* series list */
+.series-list { list-style: none; margin-bottom: 2rem; }
+.series-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+}
+.series-posts { padding-left: 1.5rem; }
+.series-posts li { padding: 0.4rem 0; }
+
+/* post */
+.post-header { margin-bottom: 2rem; }
+.post-header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+.post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+.post-body { margin-top: 2rem; }
+.post-body h1, .post-body h2, .post-body h3 {
+    margin: 2rem 0 0.75rem;
+    line-height: 1.3;
+}
+.post-body p { margin-bottom: 1.25rem; }
+.post-body code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.85rem;
+    background: var(--surface);
+    padding: 0.15rem 0.4rem;
+    border-radius: var(--radius);
+}
+.post-body pre {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    overflow-x: auto;
+    margin-bottom: 1.25rem;
+}
+.post-body pre code { background: none; padding: 0; }
+.post-body blockquote {
+    border-left: 3px solid var(--border);
+    padding-left: 1rem;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+}
+.post-body ul, .post-body ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+.post-body hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+}
+.post-nav { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+/* login */
+.login-box {
+    max-width: 360px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+.login-box h1 { margin-bottom: 1.5rem; font-size: 1.4rem; }
+.error {
+    color: var(--danger);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+/* forms */
+.form-group { margin-bottom: 1.25rem; }
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+}
+.hint { color: var(--muted); font-size: 0.78rem; }
+input[type="text"],
+input[type="password"],
+textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 0.95rem;
+    padding: 0.5rem 0.75rem;
+    font-family: inherit;
+}
+input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+textarea { resize: vertical; font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+button, .button {
+    background: var(--accent);
+    color: #0f0f0f;
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.5rem 1.1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: bold;
+}
+button:hover, .button:hover { opacity: 0.85; text-decoration: none; }
+button.danger { background: var(--danger); }
+.link-button {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: inherit;
+    padding: 0;
+}
+.link-button:hover { text-decoration: underline; }
+
+/* editor dashboard */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+.post-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.post-table th, .post-table td {
+    text-align: left;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+.post-table th { color: var(--muted); font-weight: normal; }
+.actions { display: flex; gap: 0.5rem; align-items: center; }
+
+/* edit form */
+.edit-form textarea { min-height: 500px; }
+.form-actions { display: flex; gap: 1rem; align-items: center; margin-top: 1rem; }
+
+/* footer */
+footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 4rem;
+}
+
+/* section headings */
+section { margin-bottom: 2.5rem; }
+section h2 { font-size: 1.1rem; color: var(--muted); margin-bottom: 1rem; font-weight: normal; text-transform: uppercase; letter-spacing: 0.05em; }
