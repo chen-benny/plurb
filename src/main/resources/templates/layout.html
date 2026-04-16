@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' — plurb'">plurb</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+
+<nav th:fragment="nav">
+    <div class="nav-inner">
+        <a class="nav-brand" th:href="@{/}">plurb</a>
+        <div class="nav-links">
+            <span sec:authorize="isAuthenticated()">
+                <a th:href="@{/editor}">editor</a>
+                <form th:action="@{/logout}" method="post" style="display:inline">
+                    <button type="submit" class="link-button">logout</button>
+                </form>
+            </span>
+        </div>
+    </div>
+</nav>
+
+<footer th:fragment="footer">
+    <p>plurb</p>
+</footer>
+
+</body>
+</html>

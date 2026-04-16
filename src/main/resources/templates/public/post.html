@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(${post.title})}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+
+<main class="container">
+    <article>
+        <header class="post-header">
+            <h1 th:text="${post.title}">Post Title</h1>
+            <div class="post-meta">
+                <a th:href="@{/{username}(username=${author.username})}"
+                   th:text="${author.displayName}">Author</a>
+                <span th:text="${#temporals.format(post.publishedAt, 'yyyy-MM-dd')}"></span>
+                <span th:each="tag : ${post.tags}">
+                    <a class="tag"
+                       th:href="@{/{username}/tag/{slug}(username=${author.username}, slug=${tag.slug})}"
+                       th:text="${tag.name}">tag</a>
+                </span>
+            </div>
+        </header>
+
+        <div class="post-body" th:utext="${renderedBody}">
+            Post content here.
+        </div>
+    </article>
+
+    <nav class="post-nav">
+        <a th:href="@{/{username}(username=${author.username})}">
+            ← back to <span th:text="${author.displayName}"></span>
+        </a>
+    </nav>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

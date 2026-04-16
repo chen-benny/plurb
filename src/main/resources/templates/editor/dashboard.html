@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Editor')}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+
+<main class="container">
+    <div class="dashboard-header">
+        <h1>Editor</h1>
+        <a class="button" th:href="@{/editor/new}">New Post</a>
+    </div>
+
+    <section>
+        <h2>Posts</h2>
+        <table class="post-table" th:if="${not #lists.isEmpty(posts)}">
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="post : ${posts}">
+                <td>
+                    <a th:if="${post.status.name() == 'PUBLISHED'}"
+                       th:href="@{/{username}/{slug}(username=${#authentication.name}, slug=${post.slug})}"
+                       th:text="${post.title}">Title</a>
+                    <span th:if="${post.status.name() == 'DRAFT'}"
+                          th:text="${post.title}">Title</span>
+                </td>
+                <td th:text="${post.status}">DRAFT</td>
+                <td th:text="${post.publishedAt != null}
+                        ? ${#temporals.format(post.publishedAt, 'yyyy-MM-dd')}
+                        : ${#temporals.format(post.createdAt, 'yyyy-MM-dd')}">Date</td>
+                <td class="actions">
+                    <a th:href="@{/editor/{id}(id=${post.id})}">Edit</a>
+                    <form th:action="@{/editor/{id}/publish(id=${post.id})}" method="post"
+                          style="display:inline">
+                        <button type="submit"
+                                th:text="${post.status.name() == 'DRAFT'} ? 'Publish' : 'Unpublish'">
+                            Publish
+                        </button>
+                    </form>
+                    <form th:action="@{/editor/{id}/delete(id=${post.id})}" method="post"
+                          style="display:inline"
+                          onsubmit="return confirm('Delete this post?')">
+                        <button type="submit" class="danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${#lists.isEmpty(posts)}">No posts yet. <a th:href="@{/editor/new}">Write one.</a></p>
+    </section>
+
+    <section th:if="${not #lists.isEmpty(seriesList)}">
+        <h2>Series</h2>
+        <ul class="series-list">
+            <li th:each="series : ${seriesList}" th:text="${series.title}">Series Title</li>
+        </ul>
+    </section>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

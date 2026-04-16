@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(${series.title})}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+
+<main class="container">
+    <header>
+        <h1 th:text="${series.title}">Series Title</h1>
+        <p th:if="${series.description}" th:text="${series.description}">Description</p>
+    </header>
+
+    <ol class="series-posts">
+        <li th:each="ps : ${series.postSeriesList}"
+            th:if="${ps.post.status.name() == 'PUBLISHED'}">
+            <a th:href="@{/{username}/{slug}(username=${author.username}, slug=${ps.post.slug})}"
+               th:text="${ps.post.title}">Post Title</a>
+        </li>
+    </ol>
+
+    <a th:href="@{/{username}(username=${author.username})}">← back</a>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>
