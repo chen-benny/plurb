@@ -1,0 +1,2 @@
+ALTER TABLE posts ADD COLUMN description VARCHAR(300);
+ALTER TABLE posts ADD COLUMN cover_image_url VARCHAR(512);
