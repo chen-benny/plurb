@@ -42,6 +42,12 @@ public class Post {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt = OffsetDateTime.now();
 
+    @Column(length = 300)
+    private String description;
+
+    @Column(name = "cover_image_url", length = 512)
+    private String coverImageUrl;
+
     @ManyToMany
     @JoinTable(
         name = "post_tags",
@@ -82,4 +88,10 @@ public class Post {
     public void setTags(List<Tag> tags) { this.tags = tags; }
 
     public List<PostSeries> getPostSeriesList() { return postSeriesList; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public String getCoverImageUrl() { return coverImageUrl; }
+    public void setCoverImageUrl(String coverImageUrl) { this.coverImageUrl = coverImageUrl; }
 }

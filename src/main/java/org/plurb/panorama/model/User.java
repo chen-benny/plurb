@@ -40,6 +40,9 @@ public class User {
     @OneToMany(mappedBy = "author")
     private List<Series> seriesList = new ArrayList<>();
 
+    @Column(name = "about_md", columnDefinition = "TEXT")
+    private String aboutMd;
+
     public Long getId() { return id; }
 
     public String getUsername() { return username; }
@@ -59,4 +62,7 @@ public class User {
     public List<Post> getPosts() { return posts; }
 
     public List<Series> getSeriesList() { return seriesList; }
+
+    public String getAboutMd() { return aboutMd; }
+    public void setAboutMd(String aboutMd) { this.aboutMd = aboutMd; }
 }
