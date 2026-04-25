@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('About ' + ${author.displayName})}"></head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+
+<main class="container">
+    <header class="profile-header">
+        <h1 th:text="${author.displayName}">Name</h1>
+        <p class="username" th:text="'@' + ${author.username}">@username</p>
+        <nav class="profile-nav">
+            <a th:href="@{/{username}(username=${author.username})}">Posts</a>
+            <a th:href="@{/{username}/about(username=${author.username})}">About</a>
+        </nav>
+    </header>
+
+    <div class="post-body" th:if="${!renderedBody.isEmpty()}" th:utext="${renderedBody}"></div>
+    <p th:if="${renderedBody.isEmpty()}">Nothing here yet.</p>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

@@ -1,1 +1,1 @@
-ALTER TABLE users ADD COLUMN about_md TXET;
+ALTER TABLE users ADD COLUMN about_md TEXT;

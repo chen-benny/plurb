@@ -24,6 +24,18 @@
         </div>
 
         <div class="form-group">
+            <label for="description">Description <span class="hint">(short summary, ~200 chars)</span></label>
+            <input type="text" id="description" name="description"
+                   th:value="${post != null} ? ${post.description} : ''">
+        </div>
+
+        <div class="form-group">
+            <label for="coverImageUrl">Cover Image URL</label>
+            <input type="text" id="coverImageUrl" name="coverImageUrl"
+                   th:value="${post != null} ? ${post.coverImageUrl} : ''">
+        </div>
+
+        <div class="form-group">
             <label for="tags">Tags <span class="hint">(comma separated)</span></label>
             <input type="text" id="tags" name="tags"
                    th:value="${post != null} ? ${#strings.listJoin(post.tags.![name], ', ')} : ''">

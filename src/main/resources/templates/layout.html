@@ -7,6 +7,13 @@
     <title th:text="${title} + ' — plurb'">plurb</title>
     <link rel="stylesheet" th:href="@{/static/css/main.css}">
 </head>
+
+<div th:fragment="scripts">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+</div>
+
 <body>
 
 <nav th:fragment="nav">
@@ -15,6 +22,8 @@
         <div class="nav-links">
             <span sec:authorize="isAuthenticated()">
                 <a th:href="@{/editor}">editor</a>
+                <a th:href="@{/editor/about}">about</a>
+                <a th:href="@{/editor/password}">password</a>
                 <form th:action="@{/logout}" method="post" style="display:inline">
                     <button type="submit" class="link-button">logout</button>
                 </form>

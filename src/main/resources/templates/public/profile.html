@@ -11,6 +11,8 @@
         <p class="bio" th:if="${author.bio}" th:text="${author.bio}">Bio</p>
     </section>
 
+    <a th:href="@{/{username}/about(username=${author.username})}">About</a>
+
     <section th:if="${not #lists.isEmpty(seriesList)}">
         <h2>Series</h2>
         <ul class="series-list">
