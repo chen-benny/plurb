@@ -3,6 +3,7 @@ package org.plurb.panorama.controller;
 import org.plurb.panorama.model.Post;
 import org.plurb.panorama.model.Series;
 import org.plurb.panorama.model.User;
+import org.plurb.panorama.model.PostStatus;
 import org.plurb.panorama.repository.UserRepository;
 import org.plurb.panorama.service.MarkdownService;
 import org.plurb.panorama.service.PostService;
@@ -60,7 +61,7 @@ public class PublicController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + username));
         model.addAttribute("author", author);
         model.addAttribute("tag", tagSlug);
-        model.addAttribute("posts", postService.getPublishedPostsByTags(author, tagSlug));
+        model.addAttribute("posts", postService.getPublishedPostsByTag(author, tagSlug));
         return "public/tag";
     }
 
@@ -78,5 +79,21 @@ public class PublicController {
     @GetMapping("/login")
     public String login() {
         return "login";
+    }
+
+    @GetMapping("/")
+    public String index(Model model) {
+        model.addAttribute("posts", postService.getAllPublishedPosts());
+        return "public/index";
+    }
+
+    @GetMapping("/{username}/about")
+    public String about(@PathVariable String username, Model model) {
+        User author = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + username));
+        model.addAttribute("author", author);
+        model.addAttribute("renderedBody", author.getAboutMd() != null
+            ? markdownService.render(author.getAboutMd()) : "");
+        return "public/about";
     }
 }

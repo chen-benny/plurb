@@ -5,6 +5,7 @@ import org.plurb.panorama.model.User;
 import org.plurb.panorama.repository.UserRepository;
 import org.plurb.panorama.service.PostService;
 import org.plurb.panorama.service.SeriesService;
+import org.plurb.panorama.service.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,13 +28,16 @@ public class EditorController {
     private final UserRepository userRepository;
     private final PostService postService;
     private final SeriesService seriesService;
+    private final UserService userService;
 
     public EditorController(UserRepository userRepository,
                             PostService postService,
-                            SeriesService seriesService) {
+                            SeriesService seriesService,
+                            UserService userService) {
         this.userRepository = userRepository;
         this.postService = postService;
         this.seriesService = seriesService;
+        this.userService = userService;
     }
 
     private User resolveUser(UserDetails userDetails) {
@@ -58,6 +63,8 @@ public class EditorController {
     public String createPost(@AuthenticationPrincipal UserDetails userDetails,
                              @RequestParam String title,
                              @RequestParam String slug,
+                             @RequestParam(required = false, defaultValue = "") String description,
+                             @RequestParam(required = false, defaultValue = "") String coverImageUrl,
                              @RequestParam String bodyMd,
                              @RequestParam(required = false, defaultValue = "") String tags) {
         User author = resolveUser(userDetails);
@@ -65,7 +72,7 @@ public class EditorController {
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .toList();
-        postService.createPost(author, title, slug, bodyMd, tagList);
+        postService.createPost(author, title, slug, description, coverImageUrl, bodyMd, tagList);
         return "redirect:/editor";
     }
 
@@ -88,6 +95,8 @@ public class EditorController {
                              @AuthenticationPrincipal UserDetails userDetails,
                              @RequestParam String title,
                              @RequestParam String slug,
+                             @RequestParam(required = false, defaultValue = "") String description,
+                             @RequestParam(required = false, defaultValue = "") String coverImageUrl,
                              @RequestParam String bodyMd,
                              @RequestParam(required = false, defaultValue = "") String tags) {
         User author = resolveUser(userDetails);
@@ -100,7 +109,7 @@ public class EditorController {
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .toList();
-        postService.updatePost(post, title, slug, bodyMd, tagList);
+        postService.updatePost(post, title, slug, description, coverImageUrl, bodyMd, tagList);
         return "redirect:/editor";
     }
 
@@ -129,5 +138,39 @@ public class EditorController {
         postService.deletePost(post);
         return "redirect:/editor";
     }
-}
 
+    @GetMapping("/about")
+    public String aboutForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        User author = resolveUser(userDetails);
+        model.addAttribute("aboutMd", author.getAboutMd() != null ?  author.getAboutMd() : "");
+        return "editor/about";
+    }
+
+    @PostMapping("/about")
+    public String updateAbout(@AuthenticationPrincipal UserDetails userDetails,
+                              @RequestParam String aboutMd) {
+        User author = resolveUser(userDetails);
+        userService.updateAbout(author, aboutMd);
+        return "redirect:/" + author.getUsername() + "/about";
+    }
+
+    @GetMapping("/password")
+    public String passwordForm() {
+        return "editor/password";
+    }
+
+    @PostMapping("/password")
+    public String updatePassword(@AuthenticationPrincipal UserDetails userDetails,
+                                 @RequestParam String oldPassword,
+                                 @RequestParam String newPassword,
+                                 RedirectAttributes redirectAttributes) {
+        User author = resolveUser(userDetails);
+        boolean success = userService.changePassword(author, oldPassword, newPassword);
+        if (!success) {
+            redirectAttributes.addFlashAttribute("error", "Current password is incorrect.");
+            return "redirect:/editor/password";
+        }
+        redirectAttributes.addFlashAttribute("success", "Password changed successfully.");
+        return "redirect:/editor/password";
+    }
+}

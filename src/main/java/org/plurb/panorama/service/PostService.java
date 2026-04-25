@@ -42,19 +42,20 @@ public class PostService {
         return postRepository.findById(id);
     }
 
-    public List<Post> getPublishedPostsByTags(User author, String tagSlug) {
+    public List<Post> getPublishedPostsByTag(User author, String tagSlug) {
         return postRepository.findByAuthorAndTagsSlugAndStatusOrderByCreatedAtDesc(
                 author, tagSlug, PostStatus.PUBLISHED);
     }
 
     @Transactional
     public Post createPost(User author, String title, String slug, String description,
-                           String bodyMd, List<String> tagNames) {
+                           String coverImageUrl, String bodyMd, List<String> tagNames) {
         Post post = new Post();
         post.setAuthor(author);
         post.setTitle(title);
         post.setSlug(slug);
         post.setDescription(description);
+        post.setCoverImageUrl(coverImageUrl);
         post.setBodyMd(bodyMd);
         post.setTags(resolveTags(tagNames));
         return postRepository.save(post);
@@ -62,11 +63,12 @@ public class PostService {
 
     @Transactional
     public Post updatePost(Post post, String title, String slug, String description,
-                           String bodyMd, List<String> tagNames) {
+                           String coverImageUrl, String bodyMd, List<String> tagNames) {
         post.setTitle(title);
         post.setSlug(slug);
         post.setDescription(description);
         post.setBodyMd(bodyMd);
+        post.setCoverImageUrl(coverImageUrl);
         post.setTags(resolveTags(tagNames));
         post.setUpdatedAt(OffsetDateTime.now());
         return postRepository.save(post);
@@ -76,10 +78,12 @@ public class PostService {
     public Post togglePublish(Post post) {
         if (post.getStatus().equals(PostStatus.DRAFT)) {
             post.setStatus(PostStatus.PUBLISHED);
+            post.setPublishedAt(OffsetDateTime.now());
             post.setUpdatedAt(OffsetDateTime.now());
         } else {
             post.setStatus(PostStatus.DRAFT);
             post.setPublishedAt(null);
+            post.setUpdatedAt(OffsetDateTime.now());
         }
         post.setUpdatedAt(OffsetDateTime.now());
         return postRepository.save(post);
@@ -91,9 +95,8 @@ public class PostService {
     }
 
     @Transactional
-    public void updateAbout(User user, String aboutMd) {
-        user.setAboutMd(aboutMd);
-        userRepository.save(user);
+    public List<Post> getAllPublishedPosts() {
+        return postRepository.findByStatusOrderByPublishedAtDesc(PostStatus.PUBLISHED);
     }
 
     // find existing or create new tags
@@ -112,6 +115,4 @@ public class PostService {
         }
         return tags;
     }
-
-
 }
