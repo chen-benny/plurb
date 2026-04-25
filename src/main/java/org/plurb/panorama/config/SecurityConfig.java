@@ -28,6 +28,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                     .requestMatchers("/editor/**").authenticated()
+                    .requestMatchers("/logout").permitAll()
                     .anyRequest().permitAll()
             )
             .formLogin(form -> form
@@ -36,7 +37,8 @@ public class SecurityConfig {
                     .permitAll()
             )
             .logout(logout -> logout
-                    .logoutUrl("/")
+                    .logoutUrl("/logout")
+                    .logoutSuccessUrl("/")
                     .permitAll()
             );
         return http.build();

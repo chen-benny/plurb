@@ -40,6 +40,8 @@ public class PublicController {
         model.addAttribute("author", author);
         model.addAttribute("posts", postService.getPublishedPosts(author));
         model.addAttribute("seriesList", seriesService.getAllSeries(author));
+        model.addAttribute("renderedAbout", author.getAboutMd() != null
+            ? markdownService.render(author.getAboutMd()) : "");
         return "public/profile";
     }
 

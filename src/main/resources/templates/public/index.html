@@ -5,36 +5,37 @@
 <nav th:replace="~{layout :: nav}"></nav>
 
 <main class="container">
-    <section>
-        <ul class="post-list" th:if="${not #lists.isEmpty(posts)}">
-            <li th:each="post : ${posts}" class="post-card">
-                <div class="post-card-cover" th:if="${post.coverImageUrl != null and !post.coverImageUrl.isEmpty()}">
-                    <a th:href="@{/{username}/{slug}(username=${post.author.username}, slug=${post.slug})}">
-                        <img th:src="${post.coverImageUrl}" th:alt="${post.title}">
-                    </a>
+    <div class="post-grid" th:if="${not #lists.isEmpty(posts)}">
+        <div th:each="post : ${posts}" class="post-card">
+            <div class="post-card-cover" th:if="${post.coverImageUrl != null and !post.coverImageUrl.isEmpty()}">
+                <a th:href="@{/{username}/{slug}(username=${post.author.username}, slug=${post.slug})}">
+                    <img th:src="${post.coverImageUrl}" th:alt="${post.title}">
+                </a>
+            </div>
+            <div class="post-card-body">
+                <h2>
+                    <a th:href="@{/{username}/{slug}(username=${post.author.username}, slug=${post.slug})}"
+                       th:text="${post.title}">Title</a>
+                </h2>
+                <div class="post-meta">
+                    <a th:href="@{/{username}(username=${post.author.username})}"
+                       th:text="${post.author.displayName}">Author</a>
+                    <span th:text="${#temporals.format(post.publishedAt, 'yyyy-MM-dd')}"></span>
                 </div>
-                <div class="post-card-body">
-                    <h2>
-                        <a th:href="@{/{username}/{slug}(username=${post.author.username}, slug=${post.slug})}"
-                           th:text="${post.title}">Title</a>
-                    </h2>
-                    <div class="post-meta">
-                        <a th:href="@{/{username}(username=${post.author.username})}"
-                           th:text="${post.author.displayName}">Author</a>
-                        <span th:text="${#temporals.format(post.publishedAt, 'yyyy-MM-dd')}"></span>
-                        <span th:each="tag : ${post.tags}">
-                            <a class="tag"
-                               th:href="@{/{username}/tag/{slug}(username=${post.author.username}, slug=${tag.slug})}"
-                               th:text="${tag.name}">tag</a>
-                        </span>
-                    </div>
-                    <p class="description" th:if="${post.description != null and !post.description.isEmpty()}"
-                       th:text="${post.description}"></p>
+                <div class="post-tags">
+                    <span th:each="tag : ${post.tags}">
+                        <a class="tag"
+                           th:href="@{/{username}/tag/{slug}(username=${post.author.username}, slug=${tag.slug})}"
+                           th:text="${tag.name}">tag</a>
+                    </span>
                 </div>
-            </li>
-        </ul>
-        <p th:if="${#lists.isEmpty(posts)}">No posts yet.</p>
-    </section>
+                <p class="description"
+                   th:if="${post.description != null and !post.description.isEmpty()}"
+                   th:text="${post.description}"></p>
+            </div>
+        </div>
+    </div>
+    <p th:if="${#lists.isEmpty(posts)}">No posts yet.</p>
 </main>
 
 <footer th:replace="~{layout :: footer}"></footer>
