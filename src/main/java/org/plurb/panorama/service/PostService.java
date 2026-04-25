@@ -3,6 +3,7 @@ package org.plurb.panorama.service;
 import org.plurb.panorama.model.*;
 import org.plurb.panorama.repository.PostRepository;
 import org.plurb.panorama.repository.TagRepository;
+import org.plurb.panorama.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
@@ -15,10 +16,12 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final TagRepository tagRepository;
+    private final UserRepository userRepository;
 
-    public PostService(PostRepository postRepository, TagRepository tagRepository) {
+    public PostService(PostRepository postRepository, TagRepository tagRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
         this.tagRepository = tagRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Post> getPublishedPosts(User author) {
@@ -45,22 +48,24 @@ public class PostService {
     }
 
     @Transactional
-    public Post createPost(User author, String title, String slug,
+    public Post createPost(User author, String title, String slug, String description,
                            String bodyMd, List<String> tagNames) {
         Post post = new Post();
         post.setAuthor(author);
         post.setTitle(title);
         post.setSlug(slug);
+        post.setDescription(description);
         post.setBodyMd(bodyMd);
         post.setTags(resolveTags(tagNames));
         return postRepository.save(post);
     }
 
     @Transactional
-    public Post updatePost(Post post, String title, String slug,
+    public Post updatePost(Post post, String title, String slug, String description,
                            String bodyMd, List<String> tagNames) {
         post.setTitle(title);
         post.setSlug(slug);
+        post.setDescription(description);
         post.setBodyMd(bodyMd);
         post.setTags(resolveTags(tagNames));
         post.setUpdatedAt(OffsetDateTime.now());
@@ -83,6 +88,12 @@ public class PostService {
     @Transactional
     public void deletePost(Post post) {
         postRepository.delete(post);
+    }
+
+    @Transactional
+    public void updateAbout(User user, String aboutMd) {
+        user.setAboutMd(aboutMd);
+        userRepository.save(user);
     }
 
     // find existing or create new tags
