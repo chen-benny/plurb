@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: head('plurb')}"></head>
+<body>
+<nav th:replace="~{layout :: nav(false)}"></nav>
+
+<main>
+    <section class="hero">
+        <div class="hero-inner">
+            <h1 class="hero-brand">plurb</h1>
+            <p class="hero-tagline">out of many, one.</p>
+        </div>
+    </section>
+
+    <section class="modules">
+        <div class="container-landing">
+            <div class="module-grid">
+                <div class="module-card">
+                    <h2 class="module-name">Panorama</h2>
+                    <p class="module-tagline">you are what you show.</p>
+                    <p class="module-desc">A personal markdown blog. Write, publish, share your work.</p>
+                    <a class="module-link" th:href="@{/panorama}">explore →</a>
+                </div>
+                <div class="module-card module-soon">
+                    <h2 class="module-name">Study Room</h2>
+                    <p class="module-tagline">where the magic happens.</p>
+                    <p class="module-desc">A forum for focused discussion and collaborative learning.</p>
+                    <span class="module-status">coming soon</span>
+                </div>
+                <div class="module-card module-soon">
+                    <h2 class="module-name">Ladders</h2>
+                    <p class="module-tagline">you earn it.</p>
+                    <p class="module-desc">Reputation built post by post, contribution by contribution.</p>
+                    <span class="module-status">coming soon</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="principles">
+        <div class="container-landing">
+            <h2>Principles</h2>
+            <ul class="principles-list">
+                <li>No algorithms. Chronological only.</li>
+                <li>No tracking. No ads.</li>
+                <li>Own your words.</li>
+            </ul>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

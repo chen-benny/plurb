@@ -11,4 +11,6 @@ public interface SeriesRepository extends JpaRepository<Series, Long> {
     Optional<Series> findByAuthorAndSlug(User author, String slug);
 
     List<Series> findByAuthorOrderByCreatedAtDesc(User author);
+
+    List<Series> findAllByOrderByCreatedAtDesc();
 }

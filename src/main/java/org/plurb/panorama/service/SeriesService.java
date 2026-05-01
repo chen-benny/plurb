@@ -21,6 +21,10 @@ public class SeriesService {
         return seriesRepository.findByAuthorOrderByCreatedAtDesc(author);
     }
 
+    public List<Series> getAllSeriesAcrossUsers() {
+        return seriesRepository.findAllByOrderByCreatedAtDesc();
+    }
+
     public Optional<Series> getSeries(User author, String slug) {
         return seriesRepository.findByAuthorAndSlug(author, slug);
     }

@@ -1,41 +1,80 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('Home')}"></head>
+<head th:replace="~{layout :: head('Panorama')}"></head>
 <body>
-<nav th:replace="~{layout :: nav}"></nav>
+<nav th:replace="~{layout :: nav(true)}"></nav>
 
-<main class="container">
-    <div class="post-grid" th:if="${not #lists.isEmpty(posts)}">
-        <div th:each="post : ${posts}" class="post-card">
-            <div class="post-card-cover" th:if="${post.coverImageUrl != null and !post.coverImageUrl.isEmpty()}">
-                <a th:href="@{/{username}/{slug}(username=${post.author.username}, slug=${post.slug})}">
-                    <img th:src="${post.coverImageUrl}" th:alt="${post.title}">
-                </a>
+<main class="container-index">
+    <div class="index-layout">
+        <div class="index-main">
+            <div class="post-grid" th:if="${not #lists.isEmpty(postsPage.content)}">
+                <div th:each="post : ${postsPage.content}" class="post-card">
+                    <div class="post-card-cover" th:if="${post.coverImageUrl != null and !post.coverImageUrl.isEmpty()}">
+                        <a th:href="@{/panorama/{username}/{slug}(username=${post.author.username}, slug=${post.slug})}">
+                            <img th:src="${post.coverImageUrl}" th:alt="${post.title}">
+                        </a>
+                    </div>
+                    <div class="post-card-body">
+                        <h2>
+                            <a th:href="@{/panorama/{username}/{slug}(username=${post.author.username}, slug=${post.slug})}"
+                               th:text="${post.title}">Title</a>
+                        </h2>
+                        <div class="post-meta">
+                            <a th:href="@{/panorama/{username}(username=${post.author.username})}"
+                               th:text="${post.author.displayName}">Author</a>
+                            <span th:text="${#temporals.format(post.publishedAt, 'yyyy-MM-dd')}"></span>
+                        </div>
+                        <div class="post-tags">
+                            <span th:each="tag : ${post.tags}">
+                                <a class="tag"
+                                   th:href="@{/panorama/{username}/tag/{slug}(username=${post.author.username}, slug=${tag.slug})}"
+                                   th:text="${tag.name}">tag</a>
+                            </span>
+                        </div>
+                        <p class="description"
+                           th:if="${post.description != null and !post.description.isEmpty()}"
+                           th:text="${post.description}"></p>
+                    </div>
+                </div>
             </div>
-            <div class="post-card-body">
-                <h2>
-                    <a th:href="@{/{username}/{slug}(username=${post.author.username}, slug=${post.slug})}"
-                       th:text="${post.title}">Title</a>
-                </h2>
-                <div class="post-meta">
-                    <a th:href="@{/{username}(username=${post.author.username})}"
-                       th:text="${post.author.displayName}">Author</a>
-                    <span th:text="${#temporals.format(post.publishedAt, 'yyyy-MM-dd')}"></span>
-                </div>
-                <div class="post-tags">
-                    <span th:each="tag : ${post.tags}">
-                        <a class="tag"
-                           th:href="@{/{username}/tag/{slug}(username=${post.author.username}, slug=${tag.slug})}"
-                           th:text="${tag.name}">tag</a>
-                    </span>
-                </div>
-                <p class="description"
-                   th:if="${post.description != null and !post.description.isEmpty()}"
-                   th:text="${post.description}"></p>
+            <p th:if="${#lists.isEmpty(postsPage.content)}">No posts yet.</p>
+
+            <div class="pagination" th:if="${postsPage.totalPages > 1}">
+                <a th:if="${postsPage.hasPrevious()}"
+                   th:href="@{/panorama(page=${postsPage.number - 1}, tag=${activeTag})}"
+                   class="page-btn">← prev</a>
+                <span th:each="i : ${#numbers.sequence(0, postsPage.totalPages - 1)}">
+                    <a th:href="@{/panorama(page=${i}, tag=${activeTag})}"
+                       th:text="${i + 1}"
+                       th:class="${i == postsPage.number} ? 'page-btn page-active' : 'page-btn'"></a>
+                </span>
+                <a th:if="${postsPage.hasNext()}"
+                   th:href="@{/panorama(page=${postsPage.number + 1}, tag=${activeTag})}"
+                   class="page-btn">next →</a>
             </div>
         </div>
+
+        <aside class="index-sidebar">
+            <div class="sidebar-section" th:if="${not #lists.isEmpty(allTags)}">
+                <h3>Tags</h3>
+                <div class="tag-cloud">
+                    <a th:each="t : ${allTags}"
+                       th:href="@{/panorama(tag=${t.slug})}"
+                       th:text="${t.name}"
+                       th:class="${activeTag == t.slug} ? 'tag tag-active' : 'tag'">tag</a>
+                </div>
+            </div>
+            <div class="sidebar-section" th:if="${not #lists.isEmpty(allSeries)}">
+                <h3>Series</h3>
+                <ul class="sidebar-list">
+                    <li th:each="s : ${allSeries}">
+                        <a th:href="@{/panorama/{username}/series/{slug}(username=${s.author.username}, slug=${s.slug})}"
+                           th:text="${s.title}">Series</a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
     </div>
-    <p th:if="${#lists.isEmpty(posts)}">No posts yet.</p>
 </main>
 
 <footer th:replace="~{layout :: footer}"></footer>
