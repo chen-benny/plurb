@@ -6,8 +6,11 @@
 
 <main class="container">
     <div class="dashboard-header">
-        <h1>Editor</h1>
-        <a class="button" th:href="@{/panorama/editor/new}">New Post</a>
+        <h1>Dashboard</h1>
+        <div class="dashboard-actions">
+            <a class="button" th:href="@{/panorama/editor/new}">New Post</a>
+            <a class="button button-ghost" th:href="@{/panorama/editor/about}">Edit About</a>
+        </div>
     </div>
 
     <section>

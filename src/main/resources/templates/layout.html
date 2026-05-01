@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title} + ' — plurb'">plurb</title>
     <link rel="stylesheet" th:href="@{/static/css/main.css}">
+    <script>if(localStorage.getItem('theme')==='light')document.documentElement.classList.add('light');</script>
 </head>
 
 <div th:fragment="scripts">
@@ -16,7 +17,8 @@
 
 <body>
 
-<nav th:fragment="nav(isPanorama)">
+<th:block th:fragment="nav(isPanorama)">
+<nav>
     <div th:class="${isPanorama} ? 'nav-inner' : 'nav-inner nav-inner-wide'">
         <div class="nav-brand-group">
             <a class="nav-brand" th:href="${isPanorama} ? @{/panorama} : @{/}"
@@ -27,26 +29,34 @@
         <div class="nav-links">
             <span sec:authorize="isAuthenticated()">
                 <th:block th:if="${isPanorama}">
-                    <a class="nav-btn" th:href="@{/panorama/editor}">editor</a>
-                    <a class="nav-btn" th:href="@{/panorama/editor/about}">about</a>
-                    <a class="nav-btn" th:href="@{/panorama/editor/password}">password</a>
+                    <a class="nav-btn" th:href="@{/panorama/editor}">dashboard</a>
+                    <a class="nav-btn" th:href="@{/panorama/editor/account}">account</a>
                 </th:block>
-                <form th:action="@{/logout}" method="post" style="display:inline">
-                    <button type="submit" class="nav-btn nav-btn-danger">logout</button>
-                </form>
             </span>
             <span sec:authorize="isAnonymous()">
                 <a class="nav-btn" th:href="@{/login}">login</a>
             </span>
             <th:block th:if="${isPanorama}">
-                <a class="nav-btn" th:href="@{/}">plurb</a>
+                <a class="nav-btn nav-btn-back" th:href="@{/}">&#8592; plurb</a>
             </th:block>
             <th:block th:unless="${isPanorama}">
                 <a class="nav-btn" th:href="@{/panorama}">panorama</a>
             </th:block>
+            <button type="button" id="themeToggle" class="nav-btn nav-btn-theme" title="Toggle theme">◑</button>
         </div>
     </div>
 </nav>
+<script>
+(function(){
+    var btn = document.getElementById('themeToggle');
+    if(!btn) return;
+    btn.addEventListener('click', function(){
+        var light = document.documentElement.classList.toggle('light');
+        localStorage.setItem('theme', light ? 'light' : 'dark');
+    });
+})();
+</script>
+</th:block>
 
 <footer th:fragment="footer">
     <div class="footer-inner">

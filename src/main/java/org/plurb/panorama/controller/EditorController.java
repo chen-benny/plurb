@@ -2,10 +2,12 @@ package org.plurb.panorama.controller;
 
 import org.plurb.panorama.model.Post;
 import org.plurb.panorama.model.User;
+import org.plurb.panorama.repository.TagRepository;
 import org.plurb.panorama.repository.UserRepository;
 import org.plurb.panorama.service.PostService;
 import org.plurb.panorama.service.SeriesService;
 import org.plurb.panorama.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -26,15 +28,18 @@ import java.util.List;
 public class EditorController {
 
     private final UserRepository userRepository;
+    private final TagRepository tagRepository;
     private final PostService postService;
     private final SeriesService seriesService;
     private final UserService userService;
 
     public EditorController(UserRepository userRepository,
+                            TagRepository tagRepository,
                             PostService postService,
                             SeriesService seriesService,
                             UserService userService) {
         this.userRepository = userRepository;
+        this.tagRepository = tagRepository;
         this.postService = postService;
         this.seriesService = seriesService;
         this.userService = userService;
@@ -55,26 +60,29 @@ public class EditorController {
     }
 
     @GetMapping("/new")
-    public String newPostForm() {
+    public String newPostForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        User author = resolveUser(userDetails);
+        populateEditModel(model, author, null);
         return "editor/edit";
     }
 
     @PostMapping("/new")
     public String createPost(@AuthenticationPrincipal UserDetails userDetails,
                              @RequestParam String title,
-                             @RequestParam String slug,
+                             @RequestParam(required = false, defaultValue = "") String slug,
                              @RequestParam(required = false, defaultValue = "") String description,
                              @RequestParam(required = false, defaultValue = "") String coverImageUrl,
                              @RequestParam String bodyMd,
                              @RequestParam(required = false, defaultValue = "") String tags,
+                             @RequestParam(required = false, defaultValue = "") String series,
+                             @RequestParam(required = false, defaultValue = "") String seriesDescription,
                              RedirectAttributes redirectAttributes) {
         User author = resolveUser(userDetails);
-        List<String> tagList = Arrays.stream(tags.split(","))
-                .map(String::trim)
+        List<String> tagList = Arrays.stream(tags.trim().split("\\s+"))
                 .filter(s -> !s.isEmpty())
                 .toList();
         try {
-            postService.createPost(author, title, slug, description, coverImageUrl, bodyMd, tagList);
+            postService.createPost(author, title, slug, description, coverImageUrl, bodyMd, tagList, series, seriesDescription);
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/panorama/editor/new";
@@ -92,7 +100,7 @@ public class EditorController {
         if (!post.getAuthor().getId().equals(author.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
-        model.addAttribute("post", post);
+        populateEditModel(model, author, post);
         return "editor/edit";
     }
 
@@ -100,11 +108,13 @@ public class EditorController {
     public String updatePost(@PathVariable Long id,
                              @AuthenticationPrincipal UserDetails userDetails,
                              @RequestParam String title,
-                             @RequestParam String slug,
+                             @RequestParam(required = false, defaultValue = "") String slug,
                              @RequestParam(required = false, defaultValue = "") String description,
                              @RequestParam(required = false, defaultValue = "") String coverImageUrl,
                              @RequestParam String bodyMd,
                              @RequestParam(required = false, defaultValue = "") String tags,
+                             @RequestParam(required = false, defaultValue = "") String series,
+                             @RequestParam(required = false, defaultValue = "") String seriesDescription,
                              RedirectAttributes redirectAttributes) {
         User author = resolveUser(userDetails);
         Post post = postService.getPostById(id)
@@ -112,12 +122,11 @@ public class EditorController {
         if (!post.getAuthor().getId().equals(author.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
-        List<String> tagList = Arrays.stream(tags.split(","))
-                .map(String::trim)
+        List<String> tagList = Arrays.stream(tags.trim().split("\\s+"))
                 .filter(s -> !s.isEmpty())
                 .toList();
         try {
-            postService.updatePost(post, title, slug, description, coverImageUrl, bodyMd, tagList);
+            postService.updatePost(post, title, slug, description, coverImageUrl, bodyMd, tagList, series, seriesDescription);
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/panorama/editor/" + id;
@@ -166,23 +175,63 @@ public class EditorController {
         return "redirect:/panorama/" + author.getUsername() + "/about";
     }
 
-    @GetMapping("/password")
-    public String passwordForm() {
-        return "editor/password";
+    private void populateEditModel(Model model, User author, Post post) {
+        model.addAttribute("post", post);
+        model.addAttribute("userSeries", seriesService.getAllSeries(author));
+        model.addAttribute("userTags", tagRepository.findByPostsAuthorOrderByNameAsc(author));
+        if (post != null) {
+            var ps = post.getPostSeriesList().stream().findFirst();
+            model.addAttribute("postSeriesTitle", ps.map(e -> e.getSeries().getTitle()).orElse(""));
+            model.addAttribute("postSeriesDescription", ps.map(e -> {
+                String d = e.getSeries().getDescription();
+                return d != null ? d : "";
+            }).orElse(""));
+        } else {
+            model.addAttribute("postSeriesTitle", "");
+            model.addAttribute("postSeriesDescription", "");
+        }
     }
 
-    @PostMapping("/password")
-    public String updatePassword(@AuthenticationPrincipal UserDetails userDetails,
+    @GetMapping("/password")
+    public String passwordForm() {
+        return "redirect:/panorama/editor/account";
+    }
+
+    @GetMapping("/account")
+    public String accountForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        User author = resolveUser(userDetails);
+        model.addAttribute("currentUsername", author.getUsername());
+        return "editor/account";
+    }
+
+    @PostMapping("/account/username")
+    public String changeUsername(@AuthenticationPrincipal UserDetails userDetails,
+                                 @RequestParam String newUsername,
+                                 @RequestParam String password,
+                                 HttpServletRequest request,
+                                 RedirectAttributes redirectAttributes) {
+        User author = resolveUser(userDetails);
+        String error = userService.changeUsername(author, newUsername, password);
+        if (error != null) {
+            redirectAttributes.addFlashAttribute("usernameError", error);
+            return "redirect:/panorama/editor/account";
+        }
+        request.getSession().invalidate();
+        return "redirect:/login";
+    }
+
+    @PostMapping("/account/password")
+    public String changePassword(@AuthenticationPrincipal UserDetails userDetails,
                                  @RequestParam String oldPassword,
                                  @RequestParam String newPassword,
                                  RedirectAttributes redirectAttributes) {
         User author = resolveUser(userDetails);
         boolean success = userService.changePassword(author, oldPassword, newPassword);
         if (!success) {
-            redirectAttributes.addFlashAttribute("error", "Current password is incorrect.");
-            return "redirect:/panorama/editor/password";
+            redirectAttributes.addFlashAttribute("passwordError", "Current password is incorrect.");
+            return "redirect:/panorama/editor/account";
         }
-        redirectAttributes.addFlashAttribute("success", "Password changed successfully.");
-        return "redirect:/panorama/editor/password";
+        redirectAttributes.addFlashAttribute("passwordSuccess", "Password changed successfully.");
+        return "redirect:/panorama/editor/account";
     }
 }
