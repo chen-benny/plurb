@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Controller
-@RequestMapping("/editor")
+@RequestMapping("/panorama/editor")
 public class EditorController {
 
     private final UserRepository userRepository;
@@ -66,14 +66,20 @@ public class EditorController {
                              @RequestParam(required = false, defaultValue = "") String description,
                              @RequestParam(required = false, defaultValue = "") String coverImageUrl,
                              @RequestParam String bodyMd,
-                             @RequestParam(required = false, defaultValue = "") String tags) {
+                             @RequestParam(required = false, defaultValue = "") String tags,
+                             RedirectAttributes redirectAttributes) {
         User author = resolveUser(userDetails);
         List<String> tagList = Arrays.stream(tags.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .toList();
-        postService.createPost(author, title, slug, description, coverImageUrl, bodyMd, tagList);
-        return "redirect:/editor";
+        try {
+            postService.createPost(author, title, slug, description, coverImageUrl, bodyMd, tagList);
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/panorama/editor/new";
+        }
+        return "redirect:/panorama/editor";
     }
 
     @GetMapping("/{id}")
@@ -98,7 +104,8 @@ public class EditorController {
                              @RequestParam(required = false, defaultValue = "") String description,
                              @RequestParam(required = false, defaultValue = "") String coverImageUrl,
                              @RequestParam String bodyMd,
-                             @RequestParam(required = false, defaultValue = "") String tags) {
+                             @RequestParam(required = false, defaultValue = "") String tags,
+                             RedirectAttributes redirectAttributes) {
         User author = resolveUser(userDetails);
         Post post = postService.getPostById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found: " + id));
@@ -109,8 +116,13 @@ public class EditorController {
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .toList();
-        postService.updatePost(post, title, slug, description, coverImageUrl, bodyMd, tagList);
-        return "redirect:/editor";
+        try {
+            postService.updatePost(post, title, slug, description, coverImageUrl, bodyMd, tagList);
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/panorama/editor/" + id;
+        }
+        return "redirect:/panorama/editor";
     }
 
     @PostMapping("/{id}/publish")
@@ -123,7 +135,7 @@ public class EditorController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
         postService.togglePublish(post);
-        return "redirect:/editor";
+        return "redirect:/panorama/editor";
     }
 
     @PostMapping("/{id}/delete")
@@ -136,13 +148,13 @@ public class EditorController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
         postService.deletePost(post);
-        return "redirect:/editor";
+        return "redirect:/panorama/editor";
     }
 
     @GetMapping("/about")
     public String aboutForm(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         User author = resolveUser(userDetails);
-        model.addAttribute("aboutMd", author.getAboutMd() != null ?  author.getAboutMd() : "");
+        model.addAttribute("aboutMd", author.getAboutMd() != null ? author.getAboutMd() : "");
         return "editor/about";
     }
 
@@ -151,7 +163,7 @@ public class EditorController {
                               @RequestParam String aboutMd) {
         User author = resolveUser(userDetails);
         userService.updateAbout(author, aboutMd);
-        return "redirect:/" + author.getUsername() + "/about";
+        return "redirect:/panorama/" + author.getUsername() + "/about";
     }
 
     @GetMapping("/password")
@@ -168,9 +180,9 @@ public class EditorController {
         boolean success = userService.changePassword(author, oldPassword, newPassword);
         if (!success) {
             redirectAttributes.addFlashAttribute("error", "Current password is incorrect.");
-            return "redirect:/editor/password";
+            return "redirect:/panorama/editor/password";
         }
         redirectAttributes.addFlashAttribute("success", "Password changed successfully.");
-        return "redirect:/editor/password";
+        return "redirect:/panorama/editor/password";
     }
 }

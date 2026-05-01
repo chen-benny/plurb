@@ -2,12 +2,14 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout :: head('Edit Post')}"></head>
 <body>
-<nav th:replace="~{layout :: nav}"></nav>
+<nav th:replace="~{layout :: nav(true)}"></nav>
 
 <main class="container">
     <h1 th:text="${post != null} ? 'Edit Post' : 'New Post'">Post</h1>
 
-    <form th:action="${post != null} ? @{/editor/{id}(id=${post.id})} : @{/editor/new}"
+    <p class="error" th:if="${error}" th:text="${error}"></p>
+
+    <form th:action="${post != null} ? @{/panorama/editor/{id}(id=${post.id})} : @{/panorama/editor/new}"
           method="post"
           class="edit-form">
 
@@ -18,8 +20,8 @@
         </div>
 
         <div class="form-group">
-            <label for="slug">Slug</label>
-            <input type="text" id="slug" name="slug" required
+            <label for="slug">Slug <span class="hint">(optional — generated from title if blank)</span></label>
+            <input type="text" id="slug" name="slug"
                    th:value="${post != null} ? ${post.slug} : ''">
         </div>
 
@@ -49,7 +51,7 @@
 
         <div class="form-actions">
             <button type="submit">Save</button>
-            <a th:href="@{/editor}">Cancel</a>
+            <a th:href="@{/panorama/editor}">Cancel</a>
         </div>
     </form>
 </main>
