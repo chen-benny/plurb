@@ -30,6 +30,20 @@ public class SeriesService {
     }
 
     @Transactional
+    public Series findOrCreate(User author, String title, String description) {
+        return seriesRepository.findByAuthorAndTitleIgnoreCase(author, title)
+                .orElseGet(() -> createSeries(author, title, generateSlug(title),
+                        description == null || description.isBlank() ? null : description.trim()));
+    }
+
+    private String generateSlug(String title) {
+        return title.toLowerCase()
+                .replaceAll("[^a-z0-9\\s-]", "")
+                .trim()
+                .replaceAll("[\\s-]+", "-");
+    }
+
+    @Transactional
     public Series createSeries(User author, String title, String slug, String description) {
         Series series = new Series();
         series.setAuthor(author);

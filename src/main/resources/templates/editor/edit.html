@@ -38,15 +38,40 @@
         </div>
 
         <div class="form-group">
-            <label for="tags">Tags <span class="hint">(comma separated)</span></label>
-            <input type="text" id="tags" name="tags"
-                   th:value="${post != null} ? ${#strings.listJoin(post.tags.![name], ', ')} : ''">
+            <label for="series">Series <span class="hint">(optional — creates if new)</span></label>
+            <input type="text" id="series" name="series" autocomplete="off"
+                   th:value="${postSeriesTitle}" placeholder="e.g. Rust Notes">
+            <div class="chips" th:if="${not #lists.isEmpty(userSeries)}">
+                <button type="button" class="chip" th:each="s : ${userSeries}"
+                        th:text="${s.title}" th:data-value="${s.title}"></button>
+            </div>
         </div>
 
         <div class="form-group">
-            <label for="bodyMd">Content</label>
+            <label for="seriesDescription">Series description <span class="hint">(optional)</span></label>
+            <input type="text" id="seriesDescription" name="seriesDescription" autocomplete="off"
+                   th:value="${postSeriesDescription}" placeholder="Short description of this series">
+        </div>
+
+        <div class="form-group">
+            <label for="tags">Tags <span class="hint">(space separated)</span></label>
+            <input type="text" id="tags" name="tags" autocomplete="off"
+                   th:value="${post != null} ? ${#strings.listJoin(post.tags.![name], ' ')} : ''"
+                   placeholder="e.g. rust async beginner">
+            <div class="chips" th:if="${not #lists.isEmpty(userTags)}">
+                <button type="button" class="chip" th:each="t : ${userTags}"
+                        th:text="${t.name}" th:data-value="${t.name}"></button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="editor-label-row">
+                <label for="bodyMd">Content</label>
+                <button type="button" id="previewToggle" class="chip">Preview</button>
+            </div>
             <textarea id="bodyMd" name="bodyMd" rows="30" required
                       th:text="${post != null} ? ${post.bodyMd} : ''"></textarea>
+            <div id="bodyPreview" class="body-preview prose" style="display:none"></div>
         </div>
 
         <div class="form-actions">
@@ -57,5 +82,46 @@
 </main>
 
 <footer th:replace="~{layout :: footer}"></footer>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+(function () {
+    // Series chips — clicking sets the series input value
+    document.querySelectorAll('#series ~ .chips .chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('series').value = btn.dataset.value;
+        });
+    });
+
+    // Tag chips — clicking appends the tag (space-separated), skips duplicates
+    const tagsInput = document.getElementById('tags');
+    document.querySelectorAll('#tags ~ .chips .chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tag = btn.dataset.value;
+            const existing = tagsInput.value.trim().split(/\s+/).filter(Boolean);
+            if (!existing.includes(tag)) {
+                tagsInput.value = existing.length ? existing.join(' ') + ' ' + tag : tag;
+            }
+        });
+    });
+    // Preview toggle
+    const previewToggle = document.getElementById('previewToggle');
+    const bodyMd = document.getElementById('bodyMd');
+    const bodyPreview = document.getElementById('bodyPreview');
+    let previewing = false;
+    previewToggle.addEventListener('click', () => {
+        previewing = !previewing;
+        if (previewing) {
+            bodyPreview.innerHTML = marked.parse(bodyMd.value);
+            bodyMd.style.display = 'none';
+            bodyPreview.style.display = 'block';
+            previewToggle.textContent = 'Edit';
+        } else {
+            bodyMd.style.display = '';
+            bodyPreview.style.display = 'none';
+            previewToggle.textContent = 'Preview';
+        }
+    });
+})();
+</script>
 </body>
 </html>

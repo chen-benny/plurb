@@ -13,4 +13,6 @@ public interface SeriesRepository extends JpaRepository<Series, Long> {
     List<Series> findByAuthorOrderByCreatedAtDesc(User author);
 
     List<Series> findAllByOrderByCreatedAtDesc();
+
+    java.util.Optional<Series> findByAuthorAndTitleIgnoreCase(User author, String title);
 }

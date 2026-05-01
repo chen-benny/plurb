@@ -2,6 +2,7 @@ package org.plurb.panorama.service;
 
 import org.plurb.panorama.model.*;
 import org.plurb.panorama.repository.PostRepository;
+import org.plurb.panorama.repository.PostSeriesRepository;
 import org.plurb.panorama.repository.TagRepository;
 import org.plurb.panorama.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -17,13 +18,19 @@ import java.util.Optional;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostSeriesRepository postSeriesRepository;
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
+    private final SeriesService seriesService;
 
-    public PostService(PostRepository postRepository, TagRepository tagRepository, UserRepository userRepository) {
+    public PostService(PostRepository postRepository, PostSeriesRepository postSeriesRepository,
+                       TagRepository tagRepository, UserRepository userRepository,
+                       SeriesService seriesService) {
         this.postRepository = postRepository;
+        this.postSeriesRepository = postSeriesRepository;
         this.tagRepository = tagRepository;
         this.userRepository = userRepository;
+        this.seriesService = seriesService;
     }
 
     public List<Post> getPublishedPosts(User author) {
@@ -77,7 +84,8 @@ public class PostService {
 
     @Transactional
     public Post createPost(User author, String title, String slug, String description,
-                           String coverImageUrl, String bodyMd, List<String> tagNames) {
+                           String coverImageUrl, String bodyMd, List<String> tagNames,
+                           String seriesTitle, String seriesDescription) {
         String resolvedSlug = slug == null || slug.isBlank()
                 ? generateUniqueSlug(author, title, null)
                 : slug;
@@ -92,12 +100,16 @@ public class PostService {
         post.setCoverImageUrl(coverImageUrl);
         post.setBodyMd(bodyMd);
         post.setTags(resolveTags(tagNames));
-        return postRepository.save(post);
+        post = postRepository.save(post);
+        postRepository.flush();
+        resolveSeriesMembership(author, post, seriesTitle, seriesDescription);
+        return post;
     }
 
     @Transactional
     public Post updatePost(Post post, String title, String slug, String description,
-                           String coverImageUrl, String bodyMd, List<String> tagNames) {
+                           String coverImageUrl, String bodyMd, List<String> tagNames,
+                           String seriesTitle, String seriesDescription) {
         String resolvedSlug = slug == null || slug.isBlank()
                 ? generateUniqueSlug(post.getAuthor(), title, post.getId())
                 : slug;
@@ -111,7 +123,10 @@ public class PostService {
         post.setCoverImageUrl(coverImageUrl);
         post.setTags(resolveTags(tagNames));
         post.setUpdatedAt(OffsetDateTime.now());
-        return postRepository.save(post);
+        post = postRepository.save(post);
+        postRepository.flush();
+        resolveSeriesMembership(post.getAuthor(), post, seriesTitle, seriesDescription);
+        return post;
     }
 
     @Transactional
@@ -130,6 +145,18 @@ public class PostService {
     @Transactional
     public void deletePost(Post post) {
         postRepository.delete(post);
+    }
+
+    private void resolveSeriesMembership(User author, Post post, String seriesTitle, String seriesDescription) {
+        postSeriesRepository.deleteByPost(post);
+        if (seriesTitle == null || seriesTitle.isBlank()) return;
+        Series series = seriesService.findOrCreate(author, seriesTitle.trim(), seriesDescription);
+        int position = postSeriesRepository.findMaxPositionBySeries(series) + 1;
+        PostSeries ps = new PostSeries();
+        ps.setPost(post);
+        ps.setSeries(series);
+        ps.setPosition(position);
+        postSeriesRepository.save(ps);
     }
 
     private String generateUniqueSlug(User author, String title, Long excludePostId) {
