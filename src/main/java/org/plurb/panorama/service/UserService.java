@@ -33,5 +33,22 @@ public class UserService {
         return true;
     }
 
+    @Transactional
+    public String changeUsername(User user, String newUsername, String password) {
+        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
+            return "Current password is incorrect.";
+        }
+        String trimmed = newUsername.trim().toLowerCase();
+        if (trimmed.equals(user.getUsername())) {
+            return "That is already your username.";
+        }
+        if (userRepository.existsByUsername(trimmed)) {
+            return "Username '" + trimmed + "' is already taken.";
+        }
+        user.setUsername(trimmed);
+        userRepository.save(user);
+        return null;
+    }
+
 
 }
