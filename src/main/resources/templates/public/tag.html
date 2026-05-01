@@ -2,14 +2,14 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout :: head(${tagSlug})}"></head>
 <body>
-<nav th:replace="~{layout :: nav}"></nav>
+<nav th:replace="~{layout :: nav(true)}"></nav>
 
 <main class="container">
     <h1>Posts tagged <span th:text="${tagSlug}">tag</span></h1>
 
     <ul class="post-list" th:if="${not #lists.isEmpty(posts)}">
         <li th:each="post : ${posts}">
-            <a th:href="@{/{username}/{slug}(username=${author.username}, slug=${post.slug})}"
+            <a th:href="@{/panorama/{username}/{slug}(username=${author.username}, slug=${post.slug})}"
                th:text="${post.title}">Post Title</a>
             <span class="date"
                   th:text="${#temporals.format(post.publishedAt, 'yyyy-MM-dd')}"></span>
@@ -17,7 +17,7 @@
     </ul>
     <p th:if="${#lists.isEmpty(posts)}">No posts with this tag.</p>
 
-    <a th:href="@{/{username}(username=${author.username})}">← back</a>
+    <a th:href="@{/panorama/{username}(username=${author.username})}">← back</a>
 </main>
 
 <footer th:replace="~{layout :: footer}"></footer>

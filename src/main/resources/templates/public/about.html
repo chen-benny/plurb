@@ -2,15 +2,15 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout :: head('About ' + ${author.displayName})}"></head>
 <body>
-<nav th:replace="~{layout :: nav}"></nav>
+<nav th:replace="~{layout :: nav(true)}"></nav>
 
 <main class="container">
     <header class="profile-header">
         <h1 th:text="${author.displayName}">Name</h1>
         <p class="username" th:text="'@' + ${author.username}">@username</p>
         <nav class="profile-nav">
-            <a th:href="@{/{username}(username=${author.username})}">Posts</a>
-            <a th:href="@{/{username}/about(username=${author.username})}">About</a>
+            <a th:href="@{/panorama/{username}(username=${author.username})}">Posts</a>
+            <a th:href="@{/panorama/{username}/about(username=${author.username})}">About</a>
         </nav>
     </header>
 

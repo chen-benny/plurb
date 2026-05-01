@@ -16,24 +16,34 @@
 
 <body>
 
-<nav th:fragment="nav">
-    <div class="nav-inner">
+<nav th:fragment="nav(isPanorama)">
+    <div th:class="${isPanorama} ? 'nav-inner' : 'nav-inner nav-inner-wide'">
         <div class="nav-brand-group">
-            <a class="nav-brand" th:href="@{/}">plurb</a>
-            <span class="nav-tagline">out of many, one.</span>
+            <a class="nav-brand" th:href="${isPanorama} ? @{/panorama} : @{/}"
+               th:text="${isPanorama} ? 'panorama' : 'plurb'">brand</a>
+            <span class="nav-tagline"
+                  th:text="${isPanorama} ? 'you are what you show.' : 'out of many, one.'"></span>
         </div>
         <div class="nav-links">
             <span sec:authorize="isAuthenticated()">
-            <a class="nav-btn" th:href="@{/editor}">editor</a>
-            <a class="nav-btn" th:href="@{/editor/about}">about</a>
-            <a class="nav-btn" th:href="@{/editor/password}">password</a>
-            <form th:action="@{/logout}" method="post" style="display:inline">
-                <button type="submit" class="nav-btn nav-btn-danger">logout</button>
-            </form>
+                <th:block th:if="${isPanorama}">
+                    <a class="nav-btn" th:href="@{/panorama/editor}">editor</a>
+                    <a class="nav-btn" th:href="@{/panorama/editor/about}">about</a>
+                    <a class="nav-btn" th:href="@{/panorama/editor/password}">password</a>
+                </th:block>
+                <form th:action="@{/logout}" method="post" style="display:inline">
+                    <button type="submit" class="nav-btn nav-btn-danger">logout</button>
+                </form>
             </span>
             <span sec:authorize="isAnonymous()">
                 <a class="nav-btn" th:href="@{/login}">login</a>
             </span>
+            <th:block th:if="${isPanorama}">
+                <a class="nav-btn" th:href="@{/}">plurb</a>
+            </th:block>
+            <th:block th:unless="${isPanorama}">
+                <a class="nav-btn" th:href="@{/panorama}">panorama</a>
+            </th:block>
         </div>
     </div>
 </nav>

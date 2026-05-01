@@ -2,12 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout :: head('Editor')}"></head>
 <body>
-<nav th:replace="~{layout :: nav}"></nav>
+<nav th:replace="~{layout :: nav(true)}"></nav>
 
 <main class="container">
     <div class="dashboard-header">
         <h1>Editor</h1>
-        <a class="button" th:href="@{/editor/new}">New Post</a>
+        <a class="button" th:href="@{/panorama/editor/new}">New Post</a>
     </div>
 
     <section>
@@ -25,7 +25,7 @@
             <tr th:each="post : ${posts}">
                 <td>
                     <a th:if="${post.status.name() == 'PUBLISHED'}"
-                       th:href="@{/{username}/{slug}(username=${#authentication.name}, slug=${post.slug})}"
+                       th:href="@{/panorama/{username}/{slug}(username=${#authentication.name}, slug=${post.slug})}"
                        th:text="${post.title}">Title</a>
                     <span th:if="${post.status.name() == 'DRAFT'}"
                           th:text="${post.title}">Title</span>
@@ -35,15 +35,15 @@
                         ? ${#temporals.format(post.publishedAt, 'yyyy-MM-dd')}
                         : ${#temporals.format(post.createdAt, 'yyyy-MM-dd')}">Date</td>
                 <td class="actions">
-                    <a th:href="@{/editor/{id}(id=${post.id})}">Edit</a>
-                    <form th:action="@{/editor/{id}/publish(id=${post.id})}" method="post"
+                    <a th:href="@{/panorama/editor/{id}(id=${post.id})}">Edit</a>
+                    <form th:action="@{/panorama/editor/{id}/publish(id=${post.id})}" method="post"
                           style="display:inline">
                         <button type="submit"
                                 th:text="${post.status.name() == 'DRAFT'} ? 'Publish' : 'Unpublish'">
                             Publish
                         </button>
                     </form>
-                    <form th:action="@{/editor/{id}/delete(id=${post.id})}" method="post"
+                    <form th:action="@{/panorama/editor/{id}/delete(id=${post.id})}" method="post"
                           style="display:inline"
                           onsubmit="return confirm('Delete this post?')">
                         <button type="submit" class="danger">Delete</button>
@@ -52,7 +52,7 @@
             </tr>
             </tbody>
         </table>
-        <p th:if="${#lists.isEmpty(posts)}">No posts yet. <a th:href="@{/editor/new}">Write one.</a></p>
+        <p th:if="${#lists.isEmpty(posts)}">No posts yet. <a th:href="@{/panorama/editor/new}">Write one.</a></p>
     </section>
 
     <section th:if="${not #lists.isEmpty(seriesList)}">

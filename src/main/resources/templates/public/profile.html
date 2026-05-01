@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout :: head(${author.displayName})}"></head>
 <body>
-<nav th:replace="~{layout :: nav}"></nav>
+<nav th:replace="~{layout :: nav(true)}"></nav>
 
 <main class="container">
     <section class="profile-header">
@@ -26,7 +26,7 @@
             <h2>Series</h2>
             <ul class="series-list">
                 <li th:each="series : ${seriesList}">
-                    <a th:href="@{/{username}/series/{slug}(username=${author.username}, slug=${series.slug})}"
+                    <a th:href="@{/panorama/{username}/series/{slug}(username=${author.username}, slug=${series.slug})}"
                        th:text="${series.title}">Series Title</a>
                 </li>
             </ul>
@@ -36,13 +36,13 @@
             <h2>Posts</h2>
             <ul class="post-list" th:if="${not #lists.isEmpty(posts)}">
                 <li th:each="post : ${posts}">
-                    <a th:href="@{/{username}/{slug}(username=${author.username}, slug=${post.slug})}"
+                    <a th:href="@{/panorama/{username}/{slug}(username=${author.username}, slug=${post.slug})}"
                        th:text="${post.title}">Post Title</a>
                     <span class="date"
                           th:text="${#temporals.format(post.publishedAt, 'yyyy-MM-dd')}"></span>
                     <span th:each="tag : ${post.tags}">
                         <a class="tag"
-                           th:href="@{/{username}/tag/{slug}(username=${author.username}, slug=${tag.slug})}"
+                           th:href="@{/panorama/{username}/tag/{slug}(username=${author.username}, slug=${tag.slug})}"
                            th:text="${tag.name}">tag</a>
                     </span>
                 </li>

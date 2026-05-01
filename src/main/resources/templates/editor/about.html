@@ -2,18 +2,18 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout :: head('Edit About')}"></head>
 <body>
-<nav th:replace="~{layout :: nav}"></nav>
+<nav th:replace="~{layout :: nav(true)}"></nav>
 
 <main class="container">
     <h1>Edit About Page</h1>
-    <form th:action="@{/editor/about}" method="post" class="edit-form">
+    <form th:action="@{/panorama/editor/about}" method="post" class="edit-form">
         <div class="form-group">
             <label for="aboutMd">Content <span class="hint">(markdown)</span></label>
             <textarea id="aboutMd" name="aboutMd" rows="20" th:text="${aboutMd}"></textarea>
         </div>
         <div class="form-actions">
             <button type="submit">Save</button>
-            <a th:href="@{/editor}">Cancel</a>
+            <a th:href="@{/panorama/editor}">Cancel</a>
         </div>
     </form>
 </main>
