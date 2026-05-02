@@ -7,14 +7,22 @@ import org.plurb.panorama.repository.UserRepository;
 import org.plurb.panorama.service.MarkdownService;
 import org.plurb.panorama.service.PostService;
 import org.plurb.panorama.service.SeriesService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Controller
 public class PublicController {
@@ -23,6 +31,9 @@ public class PublicController {
     private final PostService postService;
     private final SeriesService seriesService;
     private final MarkdownService markdownService;
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     public PublicController(UserRepository userRepository,
                             PostService postService,
@@ -71,6 +82,7 @@ public class PublicController {
         model.addAttribute("seriesList", seriesService.getAllSeries(author));
         model.addAttribute("renderedAbout", author.getAboutMd() != null
                 ? markdownService.render(author.getAboutMd()) : "");
+        model.addAttribute("rssUrl", baseUrl + "/panorama/" + username + "/feed.xml");
         return "public/profile";
     }
 
@@ -116,6 +128,61 @@ public class PublicController {
         model.addAttribute("renderedBody", markdownService.render(post.getBodyMd()));
         model.addAttribute("prevPost", postService.getPreviousPost(post).orElse(null));
         model.addAttribute("nextPost", postService.getNextPost(post).orElse(null));
+        model.addAttribute("canonicalUrl", baseUrl + "/panorama/" + username + "/" + slug);
+        model.addAttribute("rssUrl", baseUrl + "/panorama/" + username + "/feed.xml");
         return "public/post";
+    }
+
+    @GetMapping("/panorama/{username}/feed.xml")
+    @ResponseBody
+    public ResponseEntity<String> rssFeed(@PathVariable String username) {
+        User author = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + username));
+        List<Post> posts = postService.getPublishedPosts(author);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/rss+xml;charset=UTF-8"))
+                .body(buildRss(author, posts));
+    }
+
+    private String buildRss(User author, List<Post> posts) {
+        String channelUrl = baseUrl + "/panorama/" + author.getUsername();
+        String feedUrl = channelUrl + "/feed.xml";
+        String displayName = author.getDisplayName() != null ? author.getDisplayName() : author.getUsername();
+        StringBuilder sb = new StringBuilder();
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        sb.append("<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\">\n");
+        sb.append("<channel>\n");
+        sb.append("<title>").append(xmlEscape(displayName)).append(" — Panorama</title>\n");
+        sb.append("<link>").append(xmlEscape(channelUrl)).append("</link>\n");
+        sb.append("<atom:link href=\"").append(xmlEscape(feedUrl))
+          .append("\" rel=\"self\" type=\"application/rss+xml\"/>\n");
+        sb.append("<description>Posts by ").append(xmlEscape(author.getUsername()))
+          .append(" on Panorama</description>\n");
+        sb.append("<language>en-us</language>\n");
+        for (Post post : posts) {
+            String postUrl = baseUrl + "/panorama/" + author.getUsername() + "/" + post.getSlug();
+            sb.append("<item>\n");
+            sb.append("<title>").append(xmlEscape(post.getTitle())).append("</title>\n");
+            sb.append("<link>").append(xmlEscape(postUrl)).append("</link>\n");
+            sb.append("<guid isPermaLink=\"true\">").append(xmlEscape(postUrl)).append("</guid>\n");
+            if (post.getDescription() != null && !post.getDescription().isBlank()) {
+                sb.append("<description>").append(xmlEscape(post.getDescription())).append("</description>\n");
+            }
+            if (post.getPublishedAt() != null) {
+                sb.append("<pubDate>")
+                  .append(DateTimeFormatter.RFC_1123_DATE_TIME.format(
+                          post.getPublishedAt().atZoneSameInstant(ZoneOffset.UTC)))
+                  .append("</pubDate>\n");
+            }
+            sb.append("</item>\n");
+        }
+        sb.append("</channel>\n");
+        sb.append("</rss>\n");
+        return sb.toString();
+    }
+
+    private static String xmlEscape(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
     }
 }

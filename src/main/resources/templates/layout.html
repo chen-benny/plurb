@@ -7,6 +7,17 @@
     <title th:text="${title} + ' — plurb'">plurb</title>
     <link rel="stylesheet" th:href="@{/static/css/main.css}">
     <script>if(localStorage.getItem('theme')==='light')document.documentElement.classList.add('light');</script>
+    <th:block th:if="${post != null}">
+        <meta property="og:title" th:content="${post.title}">
+        <meta property="og:type" content="article">
+        <meta property="og:description" th:if="${post.description != null and !post.description.isEmpty()}" th:content="${post.description}">
+        <meta property="og:image" th:if="${post.coverImageUrl != null and !post.coverImageUrl.isEmpty()}" th:content="${post.coverImageUrl}">
+        <meta property="og:url" th:if="${canonicalUrl != null}" th:content="${canonicalUrl}">
+    </th:block>
+    <link rel="alternate" type="application/rss+xml"
+          th:if="${rssUrl != null}"
+          th:href="${rssUrl}"
+          th:title="${author != null ? author.displayName + ' on Panorama' : 'Panorama'}">
 </head>
 
 <div th:fragment="scripts">

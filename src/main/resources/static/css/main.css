@@ -85,6 +85,20 @@ nav {
 }
 .tag:hover { color: var(--accent); text-decoration: none; }
 
+.rss-link {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    background: var(--surface);
+    border: 1px solid #7a4a1e;
+    border-radius: var(--radius);
+    padding: 0.1rem 0.55rem;
+    color: #c97b3a;
+    text-decoration: none;
+}
+.rss-link:hover { border-color: #e8974c; color: #e8974c; text-decoration: none; }
+
 /* clickable suggestion chips in the editor */
 .chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; }
 .chip {

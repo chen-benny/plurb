@@ -8,6 +8,7 @@
     <section class="profile-header">
         <h1 th:text="${author.displayName}">Display Name</h1>
         <p class="username" th:text="'@' + ${author.username}">@username</p>
+        <a class="rss-link" th:href="${rssUrl}">RSS</a>
     </section>
 
     <div class="profile-tabs">
